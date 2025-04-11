@@ -1,0 +1,9 @@
+# Ignore all node_modules
+**/node_modules/
+
+# Node.js extras
+.env
+npm-debug.log
+dist/
+server/node_modules/
+client/node_modules/
