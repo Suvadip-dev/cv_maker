@@ -14,12 +14,19 @@ jobs:
 
     - name: Setup SSH
       run: |
+        # Start the SSH agent
+        eval $(ssh-agent -s)
+        
         # Add SSH private key to SSH agent
         mkdir -p ~/.ssh
-        echo "${{ secrets.AZURE_VM_PRIVATE_KEY }}" | ssh-add - > ~/.ssh/id_rsa
+        echo "${{ secrets.AZURE_VM_PRIVATE_KEY }}" | ssh-add -
+        
+        # Set permissions for the private key
         chmod 600 ~/.ssh/id_rsa
+        
         # Add Azure VM host to known_hosts
         ssh-keyscan -H ${{ secrets.AZURE_VM_HOST }} >> ~/.ssh/known_hosts
+        
         # Debugging output
         cat ~/.ssh/id_rsa
         cat ~/.ssh/known_hosts
