@@ -29,32 +29,16 @@ jobs:
         
         # Add Azure VM host to known_hosts
         ssh-keyscan -H ${{ secrets.AZURE_VM_HOST }} >> ~/.ssh/known_hosts
-        
-        # Debugging output (to check the private key and known hosts)
-        cat ~/.ssh/id_rsa
-        cat ~/.ssh/known_hosts
 
-    - name: Copy frontend code
+    - name: Copy frontend build files to VM
       run: |
         # Clean previous frontend files on the VM
-        ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "rm -rf /home/suvadip/cv_maker_frontend/*"
+        ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "rm -rf /var/www/html/*"
         
-        # Copy the frontend files from local to VM
-        scp -r ./client/* ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }}:/home/suvadip/cv_maker_frontend/
+        # Copy the 'build/' directory to the NGINX folder
+        scp -r ./client/build/* ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }}:/var/www/html/
 
-    - name: Build frontend on VM and deploy to NGINX folder
-      run: |
-        ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "
-          # Ensure frontend dependencies are installed and build the project
-          cd /home/suvadip/cv_maker_frontend &&
-          if [ ! -d 'node_modules' ]; then npm ci --prefer-offline; fi && # Efficient install
-          npm run build &&
-          # Remove old NGINX files and deploy new build
-          sudo rm -rf /var/www/html/* &&
-          sudo cp -r build/* /var/www/html/
-        "
-
-    - name: Copy backend code
+    - name: Copy backend code to VM
       run: |
         # Clean previous backend files on the VM
         ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "rm -rf /home/suvadip/cv_maker_backend/*"
@@ -62,7 +46,7 @@ jobs:
         # Copy the backend files from local to VM
         scp -r ./server/* ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }}:/home/suvadip/cv_maker_backend/
 
-    - name: Install backend deps and restart with PM2
+    - name: Install backend dependencies and restart with PM2
       run: |
         ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "
           # Ensure backend dependencies are installed
