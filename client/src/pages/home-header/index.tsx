@@ -29,7 +29,7 @@ const HomeHeader = () => {
       <Logo>🧑‍💼 CVBuilder</Logo>
       <NavLinks>
         <a href="#">Contact us</a>
-        <a href="#">Log in</a>
+        <a href="/login">Log in</a>
       </NavLinks>
     </HeaderWrapper>
   );
