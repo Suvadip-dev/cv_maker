@@ -19,40 +19,30 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H ${{ secrets.AZURE_VM_HOST }} >> ~/.ssh/known_hosts
 
-    - name: Clear and copy frontend code
+    - name: Copy frontend code
       run: |
         ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "rm -rf /home/suvadip/cv_maker_frontend/*"
         scp -r ./client/* ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }}:/home/suvadip/cv_maker_frontend/
 
     - name: Build frontend on VM and deploy to NGINX folder
       run: |
-        ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} << 'EOF'
-          cd /home/suvadip/cv_maker_frontend
-          if [ ! -d "node_modules" ]; then
-            echo "Installing dependencies..."
-            npm ci --prefer-offline
-          else
-            echo "Dependencies already installed, skipping npm install."
-          fi
-          npm run build
-          sudo rm -rf /var/www/html/*
+        ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "
+          cd /home/suvadip/cv_maker_frontend &&
+          npm install &&
+          npm run build &&
+          sudo rm -rf /var/www/html/* &&
           sudo cp -r build/* /var/www/html/
-        EOF
+        "
 
-    - name: Clear and copy backend code
+    - name: Copy backend code
       run: |
         ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "rm -rf /home/suvadip/cv_maker_backend/*"
         scp -r ./server/* ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }}:/home/suvadip/cv_maker_backend/
 
     - name: Install backend deps and restart with PM2
       run: |
-        ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} << 'EOF'
-          cd /home/suvadip/cv_maker_backend
-          if [ ! -d "node_modules" ]; then
-            echo "Installing backend dependencies..."
-            npm ci --prefer-offline
-          else
-            echo "Backend dependencies already installed, skipping npm install."
-          fi
-          pm2 describe app > /dev/null && pm2 restart app || pm2 start app.js --name app
-        EOF
+        ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "
+          cd /home/suvadip/cv_maker_backend &&
+          npm install &&
+          pm2 restart app || pm2 start app.js --name app
+        "
