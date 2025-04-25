@@ -17,9 +17,12 @@ jobs:
         # Start the SSH agent
         eval $(ssh-agent -s)
         
-        # Add SSH private key to SSH agent
+        # Create the .ssh directory if it doesn't exist
         mkdir -p ~/.ssh
-        echo "${{ secrets.AZURE_VM_PRIVATE_KEY }}" | ssh-add -
+        
+        # Add SSH private key to the SSH agent and save it to ~/.ssh/id_rsa
+        echo "${{ secrets.AZURE_VM_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        ssh-add ~/.ssh/id_rsa
         
         # Set permissions for the private key
         chmod 600 ~/.ssh/id_rsa
@@ -27,7 +30,7 @@ jobs:
         # Add Azure VM host to known_hosts
         ssh-keyscan -H ${{ secrets.AZURE_VM_HOST }} >> ~/.ssh/known_hosts
         
-        # Debugging output
+        # Debugging output (to check the private key and known hosts)
         cat ~/.ssh/id_rsa
         cat ~/.ssh/known_hosts
 
