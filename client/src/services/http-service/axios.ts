@@ -2,7 +2,7 @@ import axios from "axios";
 import { TokenService } from "../token-service/token-service";
 import toast from "react-hot-toast";
 
-const baseUrl = "http://localhost:5000/";
+const baseUrl = "http://20.244.40.14:5000/";
 const axiosInstance = axios.create({
   baseURL: baseUrl,
 });

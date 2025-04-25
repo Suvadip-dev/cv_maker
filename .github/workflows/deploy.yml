@@ -1,0 +1,48 @@
+name: Deploy to Azure VM
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.AZURE_VM_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.AZURE_VM_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Copy frontend code
+      run: |
+        ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "rm -rf /home/suvadip/cv_maker_frontend/*"
+        scp -r ./client/* ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }}:/home/suvadip/cv_maker_frontend/
+
+    - name: Build frontend on VM and deploy to NGINX folder
+      run: |
+        ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "
+          cd /home/suvadip/cv_maker_frontend &&
+          npm install &&
+          npm run build &&
+          sudo rm -rf /var/www/html/* &&
+          sudo cp -r build/* /var/www/html/
+        "
+
+    - name: Copy backend code
+      run: |
+        ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "rm -rf /home/suvadip/cv_maker_backend/*"
+        scp -r ./server/* ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }}:/home/suvadip/cv_maker_backend/
+
+    - name: Install backend deps and restart with PM2
+      run: |
+        ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "
+          cd /home/suvadip/cv_maker_backend &&
+          npm install &&
+          pm2 restart app || pm2 start app.js --name app
+        "
