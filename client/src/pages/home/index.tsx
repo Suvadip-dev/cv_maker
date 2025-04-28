@@ -16,6 +16,10 @@ const HomePage: React.FC = () => {
     navigate("/cv-editor"); // will redirect to login if not authenticated
   };
 
+  const handleCreateCVWithAI = () => {
+    navigate("/cv-editor?mode=ai"); // will redirect to login if not authenticated
+  };
+
   const testimonials = [
     { id: 1, name: "Sarah J.", role: "Marketing Executive", text: "This CV builder helped me land my dream job! The templates are professional and easy to customize." },
     { id: 2, name: "Michael T.", role: "Software Developer", text: "I received multiple interview calls after creating my CV here. The AI suggestions were incredibly helpful." },
@@ -35,9 +39,14 @@ const HomePage: React.FC = () => {
                 Our AI-powered CV builder helps you craft the perfect CV tailored to your industry. 
                 Stand out from the crowd and land your dream job faster.
               </Paragraph>
-              <CTAButton type="primary" size="large" onClick={handleCreateCV}>
-                Create Your CV Now — Free!
-              </CTAButton>
+              <ButtonGroup>
+                <CTAButton type="primary" size="large" onClick={handleCreateCV}>
+                  Create Your CV
+                </CTAButton>
+                <CTAButtonAI type="default" size="large" onClick={handleCreateCVWithAI}>
+                  Create Your CV with AI
+                </CTAButtonAI>
+              </ButtonGroup>
               <Paragraph style={{ marginTop: "1rem", fontSize: "14px" }}>
                 Join over 10,000 professionals who have accelerated their job search
               </Paragraph>
@@ -103,9 +112,14 @@ const HomePage: React.FC = () => {
         <Paragraph>
           Join thousands of job seekers who have successfully landed interviews using our CV builder.
         </Paragraph>
-        <CTAButton type="primary" size="large" onClick={handleCreateCV}>
-          Create Your CV Now
-        </CTAButton>
+        <ButtonGroup>
+          <CTAButton type="primary" size="large" onClick={handleCreateCV}>
+            Create Your CV
+          </CTAButton>
+          <CTAButtonAI type="default" size="large" onClick={handleCreateCVWithAI}>
+            Create Your CV with AI
+          </CTAButtonAI>
+        </ButtonGroup>
       </CTASection>
       
       <Footer />
@@ -152,6 +166,17 @@ const ImagePlaceholder = styled.div`
   font-size: 1.5rem;
 `;
 
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  
+  @media (max-width: 576px) {
+    flex-direction: column;
+    width: 100%;
+  }
+`;
+
 const CTAButton = styled(Button)`
   background-color: #ff6b00;
   border-color: #ff6b00;
@@ -163,6 +188,22 @@ const CTAButton = styled(Button)`
   &:hover {
     background-color: #e86000;
     border-color: #e86000;
+  }
+`;
+
+const CTAButtonAI = styled(Button)`
+  background-color: transparent;
+  border-color: #ffffff;
+  color: #ffffff;
+  font-weight: bold;
+  height: auto;
+  padding: 0.75rem 1.5rem;
+  font-size: 1.1rem;
+  
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: #ffffff;
+    color: #ffffff;
   }
 `;
 
